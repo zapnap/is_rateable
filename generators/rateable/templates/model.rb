@@ -30,7 +30,7 @@ class Rating < ActiveRecord::Base
     if category.blank?
       errors.add('category', 'must be supplied')
     else
-      errors.add('category', 'is not allowed') unless rateable.rating_categories.include?(category.to_sym)
+      errors.add('category', 'is not allowed') unless rateable.rating_categories.include?(category)
     end
   end
   <% end %>

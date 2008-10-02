@@ -23,7 +23,7 @@ module IsRateable
       cattr_accessor :minimum_rating_allowed, :maximum_rating_allowed, :rating_categories
       self.minimum_rating_allowed = options[:from] || 1
       self.maximum_rating_allowed = options[:upto] || 5
-      self.rating_categories = options[:categories]
+      self.rating_categories = (options[:categories] || []).map { |c| c.to_s }
     end
   end
 
@@ -40,7 +40,7 @@ module IsRateable
 
     def user_rating(user_or_ip, category = nil)
       options = {}
-      if attributes.include?('user_id')
+      if Rating.instance_methods.include?('user')
         options[:conditions] = ["user_id = ?", user_or_ip.id]
       else
         options[:conditions] = ["ip = ?", user_or_ip]
