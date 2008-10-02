@@ -12,20 +12,46 @@ module IsRateable
     #
     #   is_rateable :upto => 10
     #
+    # you can also specify categories for ratings
+    #
+    #   is_rateable :categories => [:strength, :intelligence, :wisdom]
+    #
     def is_rateable(options={})
       include InstanceMethods
       has_many :ratings, :as => :rateable
       
-      cattr_accessor :minimum_rating_allowed, :maximum_rating_allowed
+      cattr_accessor :minimum_rating_allowed, :maximum_rating_allowed, :rating_categories
       self.minimum_rating_allowed = options[:from] || 1
       self.maximum_rating_allowed = options[:upto] || 5
-      
+      self.rating_categories = options[:categories]
     end
   end
 
   module InstanceMethods
-    def rating
-      if (rating = ratings.average(:value))
+    def rating(category = nil)
+      options = {}
+      options[:conditions] = ["category = ?", category.to_s] unless category.nil?
+      if (rating = ratings.average(:value, options))
+        rating.round
+      else
+        0
+      end
+    end
+
+    def user_rating(user_or_ip, category = nil)
+      options = {}
+      if attributes.include?('user_id')
+        options[:conditions] = ["user_id = ?", user_or_ip.id]
+      else
+        options[:conditions] = ["ip = ?", user_or_ip]
+      end
+
+      unless category.nil?
+        options[:conditions][0] += " AND category = ?"
+        options[:conditions] << category.to_s
+      end
+
+      if (rating = ratings.average(:value, options))
         rating.round
       else
         0
@@ -40,8 +66,8 @@ module IsRateable
       ratings.create({ :value => value }.merge(options))
     end
     
-    def rating_in_words
-      case rating
+    def rating_in_words(category = nil)
+      case rating(category)
       when 0
         "no"
       when 1
@@ -55,25 +81,35 @@ module IsRateable
       when 5
         "five"
       else
-        rating.to_s
+        rating(category).to_s
       end      
     end
   end
 
   module ViewMethods
     # polymorphic url sucks big time. unfortunately I ended up having to create a method to do this.
-    def rating_url(record, value)
-      url_for :controller => record.class.to_s.downcase.pluralize, :id => record.to_param, :action => "rate", :rating => value
+    def rating_url(record, value, category = nil)
+      url_options = { :controller => record.class.to_s.downcase.pluralize, 
+                      :id => record.to_param, 
+                      :action => "rate", 
+                      :rating => value }
+      url_options[:category] = category unless category.nil?
+      url_for url_options
     end
 
-    def render_rating(record, type=:simple, units="star")
+    def render_rating(record, *args)
+      options = args.extract_options!
+      type = options[:type] || :simple
+      units = options[:units] || 'star'
+      category = options[:category]
+
       case type
       when :simple
-        "#{record.rating}/#{record.maximum_rating_allowed} #{pluralize(record.rating, units)}"
+        "#{record.rating(category)}/#{record.maximum_rating_allowed} #{pluralize(record.rating(category), units)}"
       when :interactive_stars
-        content_tag(:ul, :class =>  "rating #{record.rating_in_words}star") do
+        content_tag(:ul, :class =>  "rating #{record.rating_in_words(category)}star") do
           (record.minimum_rating_allowed..record.maximum_rating_allowed).map do |i|
-            content_tag(:li, link_to(i, rating_url(record, i), :title => "Rate this #{pluralize(i, units)} out of #{record.maximum_rating_allowed}", :method => :put), :class => "rating-#{i}")
+            content_tag(:li, link_to(i, rating_url(record, i, category), :title => "Rate this #{pluralize(i, units)} out of #{record.maximum_rating_allowed}", :method => :put), :class => "rating-#{i}")
           end.join("\n")
         end
       end

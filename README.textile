@@ -1,44 +1,58 @@
 h1. is_rateable
 
-Currently star buttons are a put request, not a post request like they should be due to time constraints. Should be fixed in a future version. 
+Currently star buttons are a get request, not a post request like they should be due to time constraints. Should be fixed in a future version. 
 
 Patches welcome! I do test my own stuff but until I find a nice and easy way to include rspec in plugins, they won't come with the specs.
 
 h2. Usage
 
-To install, type <code>script/generate rateable [--by_user]</code>
+To install, type <code>script/generate rateable [--by_user] [--with-categories]</code>
 
 h3. Options
 
 --by-user will associate your ratings to a user model.  Hopefully you've got one already.
+--with-categories will add multiple rating categories. Specify them in your model as shown.
 
 In your model.
 <code>
   <pre>
     is_rateable :upto => 5 # it defaults :upto => 5
+    # is_rateable :categories => [:writing, :artwork]
   </pre>
 </code>
 
 In your view.
 <code>
   <pre>
-    render_rating(@book, :interactive_stars)
+    render_rating(@book, :type => :interactive_stars)
     render_rating(@book) # If you want to also see 1/5 Stars
   </pre>
 </code>
 
-If a user rates more than twice, it will delete their older rating and put up a new rating.
+If a user rates more than twice (or twice in the same category), it will replace their older rating with a new rating.
 
 Add a method to your books_controller like so:
 <code>
   <pre>
     def rate
       @book = Book.find(params[:id])
-      unless @book.add_rating(params[:rating].to_i, :ip => request.remote_ip)
+      unless @book.add_rating(params[:rating].to_i, :category => params[:category], :ip => request.remote_ip)
         flash[:notice] = "You have already voted on this book"
       end
       redirect_to @book
     end
+  </pre>
+</code>
+
+If you're using multiple categories (writing, artwork, editing) you can supply the :category option to the render_rating view helper.
+This will display the category rating of the model. Then calling render_rating without a :category option will display the average rating
+across all categories.
+
+<code>
+  <pre>
+    render_rating(@book, :type => :interactive_stars, :category => :writing)
+    render_rating(@book, :type => :interactive_stars, :category => :artwork)
+    render_rating(@book) # Overall rating is average of two category ratings
   </pre>
 </code>
 
@@ -51,6 +65,7 @@ h2. Credits
 * "Zach Inglis":http://zachinglis.com
 * "Nathan Arnold":http://shorepound.net
 * "Tim Pope":http://www.tpope.net
+# "Nick Plante":http://blog.zerosum.org
 * "Rogie King":http://komodomedia.com - CSS for Stars
 * Some code from restful_authentication by "Rick Olson":http://activereload.com
 

@@ -24,5 +24,7 @@ protected
       "Don't generate the images and style for the star rating system") { |v| options[:skip_five_star] = false }
     opt.on("--by-user",
       "Generate and display ratings per user")                          { |v| options[:by_user] = true }
+    opt.on("--with-categories",
+      "Add categories for rateables")                                   { |v| options[:categories] = true }
   end
 end
