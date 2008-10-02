@@ -45,7 +45,7 @@ class Rating < ActiveRecord::Base
   
   def self.find_similar(rating)
     Rating.find(:first, :conditions => { <% if options[:by_user] %>:user_id => rating.user_id<% else %>:ip => rating.ip<% end %>,
-                                         <% if options[:category] %>:category => rating.category,<% end %>
+                                         <% if options[:categories] %>:category => rating.category,<% end %>
                                          :rateable_id => rating.rateable_id, :rateable_type => rating.rateable_type })
   end
 end
