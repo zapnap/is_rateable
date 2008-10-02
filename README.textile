@@ -36,7 +36,7 @@ Add a method to your books_controller like so:
   <pre>
     def rate
       @book = Book.find(params[:id])
-      unless @book.add_rating(params[:rating].to_i, :category => params[:category], :ip => request.remote_ip)
+      unless @book.rate(params[:rating].to_i, :category => params[:category], :ip => request.remote_ip)
         flash[:notice] = "You have already voted on this book"
       end
       redirect_to @book
