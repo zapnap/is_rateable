@@ -29,8 +29,8 @@ class Rating < ActiveRecord::Base
   def category_is_allowed
     if category.blank?
       errors.add('category', 'must be supplied')
-    else
-      errors.add('category', 'is not allowed') unless rateable.rating_categories.include?(category)
+    elsif !rateable.rating_categories.include?(category)
+      errors.add('category', 'is not allowed')
     end
   end
   <% end %>
