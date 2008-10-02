@@ -56,16 +56,12 @@ across all categories.
   </pre>
 </code>
 
-h2. Todo
-
-* Annotate methods
-
 h2. Credits
 
 * "Zach Inglis":http://zachinglis.com
 * "Nathan Arnold":http://shorepound.net
 * "Tim Pope":http://www.tpope.net
-# "Nick Plante":http://blog.zerosum.org
+* "Nick Plante":http://blog.zerosum.org
 * "Rogie King":http://komodomedia.com - CSS for Stars
 * Some code from restful_authentication by "Rick Olson":http://activereload.com
 
