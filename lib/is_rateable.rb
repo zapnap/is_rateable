@@ -28,27 +28,24 @@ module IsRateable
   end
 
   module InstanceMethods
-    def rating(category = nil)
-      options = {}
-      options[:conditions] = ["category = ?", category.to_s] unless category.nil?
-      if (rating = ratings.average(:value, options))
-        rating.round
-      else
-        0
-      end
-    end
+    def rating(*args)
+      options = args.extract_options!
+      category = options.delete(:category)
+      user_or_ip = options.delete(:user) || options.delete(:ip)
 
-    def user_rating(user_or_ip, category = nil)
-      options = {}
-      if Rating.instance_methods.include?('user')
+      if user_or_ip && Rating.instance_methods.include?('user')
         options[:conditions] = ["user_id = ?", user_or_ip.id]
-      else
+      elsif user_or_ip
         options[:conditions] = ["ip = ?", user_or_ip]
       end
 
       unless category.nil?
-        options[:conditions][0] += " AND category = ?"
-        options[:conditions] << category.to_s
+        if options[:conditions]
+          options[:conditions][0] += " AND category = ?"
+          options[:conditions] << category.to_s
+        else
+          options[:conditions] = ["category = ?", category.to_s]
+        end
       end
 
       if (rating = ratings.average(:value, options))
@@ -66,8 +63,9 @@ module IsRateable
       ratings.create({ :value => value }.merge(options))
     end
     
-    def rating_in_words(category = nil)
-      case rating(category)
+    def rating_in_words(*args)
+      options = args.extract_options!
+      case rating(options)
       when 0
         "no"
       when 1
@@ -81,7 +79,7 @@ module IsRateable
       when 5
         "five"
       else
-        rating(category).to_s
+        rating(options).to_s
       end      
     end
   end
@@ -102,12 +100,13 @@ module IsRateable
       type = options[:type] || :simple
       units = options[:units] || 'star'
       category = options[:category]
+      user = options[:user] || options[:ip]
 
       case type
       when :simple
-        "#{record.rating(category)}/#{record.maximum_rating_allowed} #{pluralize(record.rating(category), units)}"
+        "#{record.rating(:category => category, :user => user)}/#{record.maximum_rating_allowed} #{pluralize(record.rating(:category => category, :user => user), units)}"
       when :interactive_stars
-        content_tag(:ul, :class =>  "rating #{record.rating_in_words(category)}star") do
+        content_tag(:ul, :class =>  "rating #{record.rating_in_words(:category => category, :user => user)}star") do
           (record.minimum_rating_allowed..record.maximum_rating_allowed).map do |i|
             content_tag(:li, link_to(i, rating_url(record, i, category), :title => "Rate this #{pluralize(i, units)} out of #{record.maximum_rating_allowed}", :method => :put), :class => "rating-#{i}")
           end.join("\n")
