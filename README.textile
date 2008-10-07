@@ -56,6 +56,9 @@ across all categories.
   </pre>
 </code>
 
+If you want to see ratings for a specific user rather than global averages, you can also specify the :user option and pass it the
+user for whom you wish to obtain ratings.
+
 h2. Credits
 
 * "Zach Inglis":http://zachinglis.com
