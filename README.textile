@@ -14,6 +14,7 @@ h3. Options
 --with-categories will add multiple rating categories. Specify them in your model as shown.
 
 In your model.
+
 <code>
   <pre>
     is_rateable :upto => 5 # it defaults :upto => 5
@@ -22,6 +23,7 @@ In your model.
 </code>
 
 In your view.
+
 <code>
   <pre>
     render_rating(@book, :type => :interactive_stars)
@@ -32,6 +34,7 @@ In your view.
 If a user rates more than twice (or twice in the same category), it will replace their older rating with a new rating.
 
 Add a method to your books_controller like so:
+
 <code>
   <pre>
     def rate
@@ -47,6 +50,7 @@ Add a method to your books_controller like so:
 If you're using multiple categories (writing, artwork, editing) you can supply the :category option to the render_rating view helper.
 This will display the category rating of the model. Then calling render_rating without a :category option will display the average rating
 across all categories.
+
 <code>
   <pre>
     render_rating(@book, :type => :interactive_stars, :category => :writing)
@@ -57,6 +61,7 @@ across all categories.
 
 If you want to see ratings for a specific user rather than global averages, you can also specify the :user option and pass it the
 user for whom you wish to obtain ratings.
+
 <code>
   <pre>
     render_rating(@book, :type => :interactive_stars, :user => user)
