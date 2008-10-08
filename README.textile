@@ -11,6 +11,7 @@ To install, type <code>script/generate rateable [--by_user] [--with-categories]<
 h3. Options
 
 --by-user will associate your ratings to a user model.  Hopefully you've got one already.
+
 --with-categories will add multiple rating categories. Specify them in your model as shown.
 
 In your model.
