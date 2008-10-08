@@ -1,6 +1,6 @@
 h1. is_rateable
 
-Currently star buttons are a get request, not a post request like they should be due to time constraints. Should be fixed in a future version. 
+Currently star buttons are a put request, not a post request like they should be due to time constraints. Should be fixed in a future version. 
 
 Patches welcome! I do test my own stuff but until I find a nice and easy way to include rspec in plugins, they won't come with the specs.
 
@@ -47,7 +47,6 @@ Add a method to your books_controller like so:
 If you're using multiple categories (writing, artwork, editing) you can supply the :category option to the render_rating view helper.
 This will display the category rating of the model. Then calling render_rating without a :category option will display the average rating
 across all categories.
-
 <code>
   <pre>
     render_rating(@book, :type => :interactive_stars, :category => :writing)
@@ -58,6 +57,11 @@ across all categories.
 
 If you want to see ratings for a specific user rather than global averages, you can also specify the :user option and pass it the
 user for whom you wish to obtain ratings.
+<code>
+  <pre>
+    render_rating(@book, :type => :interactive_stars, :user => user)
+  </pre>
+</code>
 
 h2. Credits
 
